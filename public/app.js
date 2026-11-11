@@ -121,7 +121,7 @@
         <div class="fact"><dt>المادة</dt><dd>${esc(L.subject)}</dd></div>
         <div class="fact"><dt>الصف</dt><dd>${esc(L.grade)}</dd></div>
         <div class="fact"><dt>طريقة التنفيذ</dt><dd>${esc(L.delivery)}</dd></div>
-        <div class="fact"><dt>التاريخ</dt><dd>${esc(L.date)}</dd></div>
+        <div class="fact"><dt>التاريخ</dt><dd>${esc(CertRenderer.rtlDates(L.date))}</dd></div>
         <div class="fact"><dt>${esc(L.teachersTitle)}</dt><dd>${esc(L.teachers)}</dd></div>
       </dl>
     </section>

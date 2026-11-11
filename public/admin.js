@@ -329,8 +329,7 @@
         <div class="field"><label for="ctitle">عنوان الشهادة</label><input id="ctitle" type="text" value="${esc(certSet.title)}"></div>
         <div class="field"><label for="cbody">النص (كل سطر في الشهادة سطر هنا)</label><textarea id="cbody" rows="8">${esc(certSet.body)}</textarea>
           <span class="hint">العناصر المتاحة: {الاسم} في سطر مستقل يظهر بحجم بارز، {عنوان_الدرس} في سطر مستقل يظهر بالإنجليزية، {المادة} {الصف} {طريقة_التنفيذ} {التاريخ} {رقم_الشهادة}. تُؤخذ قيمها من «محتوى الدرس». الترويسة وأسماء الموقّعات تُعدّل من «محتوى الدرس».</span></div>
-        <div class="grid2"><div class="field"><label for="cpre">بادئة رقم الشهادة</label><input id="cpre" type="text" dir="ltr" value="${esc(certSet.numberPrefix)}"></div>
-          <div class="field"><span class="label">رمز التحقق على الشهادة</span><label class="switch"><input type="checkbox" id="cqr" ${certSet.showQr !== false ? 'checked' : ''}> إظهار رمز QR للتحقق</label></div></div>
+        <div class="field"><label for="cpre">بادئة رقم الشهادة (يظهر الرقم في صفحة الشهادة ولوحة المعلمة فقط)</label><input id="cpre" type="text" dir="ltr" value="${esc(certSet.numberPrefix)}"><input type="checkbox" id="cqr" hidden></div>
         <button class="btn btn-primary" data-savecert>حفظ نص الشهادة</button>
       </div>
       <div class="card">

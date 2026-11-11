@@ -8,8 +8,8 @@
 
   async function fontsReady() {
     if (!document.fonts) return;
-    const specs = ['700 56px "El Messiri"', '600 30px "El Messiri"', '500 26px "Tajawal"', '700 26px "Tajawal"', '400 20px "Tajawal"'];
-    await Promise.race([Promise.all(specs.map(s => document.fonts.load(s, 'شهادة حضور Where'))), new Promise(r => setTimeout(r, 2500))]).catch(() => {});
+    const specs = ['700 56px "El Messiri"', '500 27px "Tajawal"', '700 24px "Tajawal"', '500 18px "Tajawal"'];
+    await Promise.race([Promise.all(specs.map(s => document.fonts.load(s, 'شهادة حضور Where'))), new Promise(r => setTimeout(r, 4000))]).catch(() => {});
   }
   function loadImg(src) {
     return new Promise(res => {
@@ -19,10 +19,12 @@
       im.src = src;
     });
   }
+  // يجعل التواريخ تُقرأ من اليمين إلى اليسار (اليوم يمينًا ثم الشهر ثم السنة)
+  const rtlDates = t => String(t || '').replace(/([0-9\u0660-\u0669]+)\s*\/\s*(?=[0-9\u0660-\u0669])/g, '$1\u200F/\u200F');
   function fill(tpl, d) {
     const L = d.lesson || {};
     const map = { 'الاسم': d.name, 'المادة': L.subject, 'عنوان_الدرس': L.title, 'الصف': L.grade, 'طريقة_التنفيذ': L.delivery, 'التاريخ': L.date, 'رقم_الشهادة': d.number, 'المقرر': L.course };
-    return tpl.replace(/\{([^}]+)\}/g, (m, k) => (k in map ? (map[k] || '') : m));
+    return rtlDates(tpl.replace(/\{([^}]+)\}/g, (m, k) => (k in map ? (map[k] || '') : m)));
   }
   function wrap(g, text, maxW) {
     const words = text.split(/\s+/); const lines = []; let cur = '';
@@ -87,13 +89,7 @@
       g.fillText(line, LW - 76, 86 + i * 30);
     });
     // الشعار (وسط)
-    if (logo) drawImgCentered(g, logo, LW / 2, 118, Math.min(170, 120 * logo.naturalWidth / logo.naturalHeight));
-    // رقم الشهادة (يسار)
-    g.direction = 'ltr'; g.textAlign = 'left';
-    g.fillStyle = C.muted; g.font = `500 16px ${AR}`;
-    g.direction = 'rtl'; g.textAlign = 'left'; g.fillText('رقم الشهادة', 78, 86);
-    g.direction = 'ltr'; g.fillStyle = C.tealDeep; g.font = `700 22px ${AR}`; g.fillText(d.number || '—', 78, 116);
-
+    if (logo) drawImgCentered(g, logo, LW / 2, 120, Math.min(230, 130 * logo.naturalWidth / logo.naturalHeight));
     // العنوان
     g.direction = 'rtl'; g.textAlign = 'center';
     g.fillStyle = C.teal; g.font = `700 66px ${DISPLAY}`;
@@ -126,7 +122,7 @@
         g.direction = 'ltr'; g.font = `700 42px ${DISPLAY}`; g.fillStyle = C.lilac;
         y += 10; g.fillText(b.text, LW / 2, y + 30); y += 60;
       } else {
-        g.direction = 'rtl'; g.font = `500 26px ${AR}`; g.fillStyle = C.ink;
+        g.direction = 'rtl'; g.font = `500 27px ${AR}`; g.fillStyle = C.ink;
         for (const ln of wrap(g, b.text, LW - 280)) { g.fillText(ln, LW / 2, y + 26); y += 40; }
       }
     }
@@ -135,12 +131,12 @@
     const ty = Math.max(y + 22, 662);
     g.direction = 'rtl'; g.textAlign = 'center';
     g.fillStyle = C.teal; g.font = `700 19px ${AR}`; g.fillText(L.teachersTitle || 'المعلمتان المنفذتان', LW / 2, ty);
-    g.fillStyle = C.ink; g.font = `600 24px ${AR}`; g.fillText(L.teachers || '', LW / 2, ty + 34);
+    g.fillStyle = C.ink; g.font = `700 24px ${AR}`; g.fillText(L.teachers || '', LW / 2, ty + 34);
 
     const lay = d.layout || {};
     const col = (cx, title, name) => {
       g.fillStyle = C.teal; g.font = `700 19px ${AR}`; g.fillText(title || '', cx, 790);
-      g.fillStyle = C.ink; g.font = `600 23px ${AR}`; g.fillText(name || '', cx, 824);
+      g.fillStyle = C.ink; g.font = `700 24px ${AR}`; g.fillText(name || '', cx, 824);
     };
     col(LW * 0.80, L.viceTitle, L.viceName);
     col(LW * 0.20, L.principalTitle, L.principalName);
@@ -151,12 +147,6 @@
       g.save(); g.setLineDash([6, 6]); g.strokeStyle = 'rgba(106,76,156,.7)'; g.lineWidth = 1.5;
       for (const k of ['stamp', 'sigVice', 'sigPrincipal']) { const p = lay[k]; if (!p) continue; const w = p.w * LW, h = k === 'stamp' ? w : w * 0.45; g.strokeRect(p.x * LW - w / 2, p.y * LH - h / 2, w, h); }
       g.restore();
-    }
-    // رمز التحقق
-    if (d.cert && d.cert.showQr !== false && d.verifyUrl && global.QR) {
-      global.QR.draw(g, d.verifyUrl, 62, LH - 186, 104, C.tealDeep, '#FFFFFF');
-      g.direction = 'rtl'; g.textAlign = 'center'; g.fillStyle = C.muted; g.font = `500 13px ${AR}`;
-      g.fillText('امسحي للتحقق', 114, LH - 66);
     }
     // ملغاة
     if (d.status === 'revoked') {
@@ -193,5 +183,6 @@
     return new Blob(chunks, { type: 'application/pdf' });
   }
 
-  global.CertRenderer = { render, canvasToPdf, LW, LH };
+  global.CertRenderer = { render, canvasToPdf, rtlDates, LW, LH };
 })(window);
+
